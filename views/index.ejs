@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket = io.connect();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        .main_wrap {
+            max-width: 600px;
+            margin: auto;
+            margin-top: 10px;
+        }
+        .users p {
+            display: inline-block;
+            padding: 0 3px;
+        }
+        .messages {
+            max-height: 300px;
+            overflow-y: scroll;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            padding: 10px;
+        }
+        .messages p {
+            margin: 0;
+            word-wrap: break-word;
+        }
+        input {
+            padding: 3px;
+            font-size: 20px;
+        }
+        .new_user {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="main_wrap">
+        <div class="left">
+            <div class="users_header">
+                <h2>Users Logged In:</h2>
+                <div class="users"></div>
+            </div>
+            <div class="messages_header">
+                <h2>Messages:</h2>
+                <div class="messages"></div>
+            </div>
+        </div>
+        <div class="right">
+            New Message:
+            <input type="text" name="content" id="content" cols="30" rows="10" class="content">
+            <button id="send"> &gt; </button>
+        </div>
+    </div>
+    <script>
+
+        var user = window.prompt("What is your name?");
+
+        function scrollMessages() {
+            $('.messages').animate({ scrollTop: $(document).height() }, "slow");
+        }
+
+        socket.emit('new_user', user);
+        socket.emit('get_users');
+        socket.emit('get_messages_single');
+        scrollMessages();
+
+        setInterval(function(){
+            if ( $('.content').val().length == 0 ) {
+                socket.emit('user_stopped_typing', user);
+            } else {
+                socket.emit('user_typing', user);
+            }
+        }, 1000);
+
+        $('#send').click(function () {
+            socket.emit('send_message', {user: user, message: $('.content').val()});
+            $('.content').val('');
+        });
+
+        socket.on('user_not_typing', function (user) {
+            $('.typing_'+user).remove();
+        });
+
+        socket.on('update_users', function (data) {
+            $('.users').empty();
+            for ( x in data ) {
+                $('.users').append('<p>'+data[x]+'</p>');
+            }
+            scrollMessages();
+        });
+
+        socket.on('update_messages_single', function (messages) {
+            $('.messages').empty();
+            for ( x in messages ) {
+                $('.messages').append('<p><strong>'+messages[x]['user']['user']+':</strong> '+messages[x]['user']['message']+'</p>');
+            }
+            scrollMessages();
+        });
+
+        socket.on('update_messages', function (message) {
+            $('.messages').append('<p><strong>'+message['user']['user']+':</strong> '+message['user']['message']+'</p>');
+            scrollMessages();
+            socket.emit('user_stopped_typing', user);
+        });
+
+        socket.on('user_joined', function (user) {
+            console.log(user);
+            $('.messages').append('<p class="new_user">'+user+' joined the room. Say hello!</p>');
+            scrollMessages();
+        });
+
+        socket.on('user_left', function (user) {
+            console.log(user);
+            $('.messages').append('<p class="new_user">'+user+' left the room.</p>');
+            scrollMessages();
+        });
+
+        socket.on('user_typing_now', function (user) {
+            if ( $('.typing_'+user).length == 0 ) {
+                $('.messages').after('<p class="new_user typing_'+user+'">'+user+' is typing a message <i class="fa fa-spin fa-spinner" aria-hidden="true"></i></p>');
+            }
+        });
+
+        document.onkeypress = keyPress;
+
+        function keyPress(e){
+            var x = e || window.event;
+            var key = (x.keyCode || x.which);
+            if(key == 13 || key == 3){
+                if ( $('.content').val().length > 0 ) {
+                    $('#send').click();
+                } else {
+                    alert('Please enter a message');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
