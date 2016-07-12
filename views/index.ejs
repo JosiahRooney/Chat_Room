@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chatroom built on Node.js and Express</title>
+    <title>Chatroom</title>
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="/node_modules/jquery.titlealert.min.js"></script>
     <script type="text/javascript">
         var socket = io.connect();
     </script>
@@ -67,6 +68,40 @@
 
         var user = window.prompt("What is your name?");
 
+        function getHiddenProp(){
+            var prefixes = ['webkit','moz','ms','o'];
+            if ('hidden' in document) return 'hidden';
+            for (var i = 0; i < prefixes.length; i++){
+                if ((prefixes[i] + 'Hidden') in document)
+                    return prefixes[i] + 'Hidden';
+            }
+            return null;
+        }
+
+        function isHidden() {
+            var prop = getHiddenProp();
+            if (!prop) return false;
+
+            return document[prop];
+        }
+
+        var visProp = getHiddenProp();
+        if (visProp) {
+            var evtname = visProp.replace(/[H|h]idden/,'') + 'visibilitychange';
+            document.addEventListener(evtname, visChange);
+        }
+        function visChange() {
+
+            if (isHidden()) {
+                // Hidden
+                $('.unread').remove();
+            } else {
+                // Shown
+                document.title = "Chatroom";
+            }
+        }
+
+
         function scrollMessages() {
             $('.messages').animate({ scrollTop: $(document).height() }, "slow");
         }
@@ -110,6 +145,18 @@
         });
 
         socket.on('update_messages', function (message) {
+            if ( isHidden() ) {
+                $.titleAlert("New chat message!", {
+                    requireBlur:false,
+                    stopOnFocus:true,
+                    interval:700
+                });
+                if ( $('.unread').length == 0 ) {
+                    $('.messages').append('<hr class="unread"><p class="new_user unread">Unread Messages:</p><br class="unread"> ');
+                }
+            } else {
+                document.title = "Chatroom";
+            }
             $('.messages').append('<p><strong>'+message['user']['user']+':</strong> '+escapeHtml(message['user']['message'])+'</p>');
             scrollMessages();
             socket.emit('user_stopped_typing', user);
