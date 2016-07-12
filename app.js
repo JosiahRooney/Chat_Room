@@ -69,5 +69,6 @@ io.sockets.on('connection', function(socket) {
             clients.splice(i, 1);
         }
         io.emit('update_users', clients);
+        io.emit('user_left', socket.global_user);
     });
 });
