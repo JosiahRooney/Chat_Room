@@ -55,11 +55,11 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on('user_typing', function(user) {
-        socket.broadcast.emit('user_typing_now', user);
+        socket.broadcast.emit('user_typing_now', user.split(' ').join('_'));
     });
 
     socket.on('user_stopped_typing', function(user) {
-        socket.broadcast.emit('user_not_typing', user);
+        socket.broadcast.emit('user_not_typing', user.split(' ').join('_'));
     });
 
     // Logout user
