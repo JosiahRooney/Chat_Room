@@ -15,8 +15,8 @@ app.post('/users', function(req, res) {
     res.redirect('/');
 });
 
-var server = app.listen(6789, function() {
-    console.log("listening on port 8000");
+var server = app.listen(process.env.PORT || 6789, function() {
+    console.log("listening on port 6789");
 });
 
 var io = require('socket.io').listen(server);
