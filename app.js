@@ -23,6 +23,21 @@ var io = require('socket.io').listen(server);
 var messages = [];
 var clients = [];
 
+var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
+}
+
 io.sockets.on('connection', function(socket) {
     socket.global_user = "";
 
@@ -33,8 +48,9 @@ io.sockets.on('connection', function(socket) {
 
     // Send Message
     socket.on('send_message', function (user, message) {
-        messages.push({user: user, message: message});
-        io.emit('update_messages', {user: user, message: message});
+        messages.push({user: user, message: escapeHtml(message)});
+        clean_msg = escapeHtml(message);
+        io.emit('update_messages', {user: user, message: clean_msg});
     });
 
     // Show messages for all users

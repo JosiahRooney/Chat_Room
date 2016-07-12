@@ -104,13 +104,13 @@
         socket.on('update_messages_single', function (messages) {
             $('.messages').empty();
             for ( x in messages ) {
-                $('.messages').append('<p><strong>'+messages[x]['user']['user']+':</strong> '+messages[x]['user']['message']+'</p>');
+                $('.messages').append('<p><strong>'+messages[x]['user']['user']+':</strong> '+escapeHtml(messages[x]['user']['message'])+'</p>');
             }
             scrollMessages();
         });
 
         socket.on('update_messages', function (message) {
-            $('.messages').append('<p><strong>'+message['user']['user']+':</strong> '+message['user']['message']+'</p>');
+            $('.messages').append('<p><strong>'+message['user']['user']+':</strong> '+escapeHtml(message['user']['message'])+'</p>');
             scrollMessages();
             socket.emit('user_stopped_typing', user);
         });
@@ -146,6 +146,20 @@
                 }
             }
         }
+        var entityMap = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': '&quot;',
+            "'": '&#39;',
+            "/": '&#x2F;'
+        };
+        function escapeHtml(string) {
+            return String(string).replace(/[&<>"'\/]/g, function (s) {
+                return entityMap[s];
+            });
+        }
     </script>
 </body>
 </html>
+
