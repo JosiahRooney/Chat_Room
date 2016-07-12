@@ -49,7 +49,7 @@ io.sockets.on('connection', function(socket) {
 
     // Login user
     socket.on('new_user', function (user) {
-        socket.global_user = user;
+        socket.global_user = user.split(' ').join('_');
         clients.push(socket.global_user);
         socket.broadcast.emit('user_joined', socket.global_user);
     });
