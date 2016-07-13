@@ -3,65 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Chatroom</title>
-    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <link rel="shortcut icon" href="https://dashboard.heroku.com/images/favicon.ico" type="image/vnd.microsoft.icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+
+    <script src="/static/jquery_2.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-    <script src="/node_modules/jquery.titlealert.min.js"></script>
     <script type="text/javascript">
         var socket = io.connect();
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
-    <link rel="shortcut icon" href="https://dashboard.heroku.com/images/favicon.ico" type="image/vnd.microsoft.icon">
-    <style>
-        body {
-            font-family: sans-serif;
-        }
-        .main_wrap {
-            max-width: 600px;
-            margin: auto;
-            margin-top: 10px;
-        }
-        .users p {
-            display: inline-block;
-            padding: 0 3px;
-        }
-        .messages {
-            max-height: 300px;
-            overflow-y: scroll;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            padding: 10px;
-        }
-        .messages p {
-            margin: 0;
-            word-wrap: break-word;
-        }
-        input {
-            padding: 3px;
-            font-size: 20px;
-        }
-        .new_user {
-            color: #777;
-            font-style: italic;
-            font-size: 85%;
-        }
-    </style>
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="main_wrap">
-        <div class="left">
-            <div class="users_header">
-                <h2>Users Logged In:</h2>
+    <div class="header">
+        <div class="header_wrap container">
+            <h1>ChatRoom <small>A chat application built on Node.js, Express, and Socket.io</small></h1>
+        </div>
+    </div>
+    <div class="main_wrap container">
+        <div class="left row">
+            <div class="users_header col-md-3">
+                <h3>Users Logged In:</h3>
                 <div class="users"></div>
             </div>
-            <div class="messages_header">
-                <h2>Messages:</h2>
+            <div class="messages_header col-md-9">
+                <h3>Messages:</h3>
                 <div class="messages"></div>
             </div>
         </div>
-        <div class="right">
-            New Message:
-            <input type="text" name="content" id="content" cols="30" rows="10" class="content">
-            <button id="send"> &gt; </button>
+        <div class="right row">
+            <div class="posrel col-md-9 col-md-offset-3">
+                <input type="text" name="content" id="content" class="content form-control" placeholder="Enter a message">
+                <button id="send" class="btn btn-success"> &gt; </button>
+            </div>
         </div>
     </div>
     <script>
@@ -139,7 +116,7 @@
         socket.on('update_messages_single', function (messages) {
             $('.messages').empty();
             for ( x in messages ) {
-                $('.messages').append('<p><strong>'+messages[x]['user']['user']+':</strong> '+escapeHtml(messages[x]['user']['message'])+'</p>');
+                $('.messages').append('<p class="posrel"><strong>'+messages[x]['user']+':</strong> '+escapeHtml(messages[x]['message'])+'<small>'+messages[x]['created_at']+'</small></p>');
             }
             scrollMessages();
         });
@@ -157,7 +134,7 @@
             } else {
                 document.title = "Chatroom";
             }
-            $('.messages').append('<p><strong>'+message['user']['user']+':</strong> '+escapeHtml(message['user']['message'])+'</p>');
+            $('.messages').append('<p class="posrel"><strong>'+message['user']+':</strong> '+escapeHtml(message['message'])+'<small>'+message['created_at']+'</small></p>');
             scrollMessages();
             socket.emit('user_stopped_typing', user);
         });
@@ -207,6 +184,8 @@
             });
         }
     </script>
+    <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/node_modules/jquery.titlealert.min.js"></script>
 </body>
 </html>
 

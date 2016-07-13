@@ -1,0 +1,70 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.header {
+    background-color: #1b6d85;
+    color: white;
+}
+
+.header small {
+    color: #d5d5d5;
+    font-size: 55%;
+}
+
+.users p {
+    display: inline-block;
+    padding: 0 3px;
+}
+
+.messages {
+    height: 300px;
+    overflow-y: scroll;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+    padding: 10px;
+}
+
+.messages p {
+    margin: 0;
+    word-wrap: break-word;
+    padding-right: 155px;
+}
+
+.messages small {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.new_user {
+    color: #777;
+    font-style: italic;
+    font-size: 85%;
+    background-color: rgba(0,0,0,0.03);
+}
+
+.posrel {
+    position: relative;
+}
+
+#content {
+    width: calc(100% - 35px);
+}
+
+#send {
+    position: absolute;
+    top: 0;
+    right: 15px;
+}
+
+@media (max-width: 800px) {
+    .messages p {
+        padding: 0;
+    }
+    .messages small,
+    h1 small {
+        display: none;
+    }
+}

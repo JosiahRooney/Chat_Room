@@ -1,11 +1,11 @@
 var express = require("express");
 var path = require("path");
 var app = express();
-var bodyParser = require('body-parser');
+var moment = require('moment');
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/static")));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
+app.use('/static', express.static(__dirname + '/static'));
 app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
 app.get('/', function(req, res) {
@@ -21,7 +21,7 @@ var server = app.listen(process.env.PORT || 6789, function() {
 
 var io = require('socket.io').listen(server);
 var messages = [];
-var clients = [];
+var clients = {};
 
 var entityMap = {
     "&": "&amp;",
@@ -47,10 +47,11 @@ io.sockets.on('connection', function(socket) {
     });
 
     // Send Message
-    socket.on('send_message', function (user, message) {
-        messages.push({user: user, message: escapeHtml(message)});
-        clean_msg = escapeHtml(message);
-        io.emit('update_messages', {user: user, message: clean_msg});
+    socket.on('send_message', function (data) {
+        var now = moment().format('MMMM Do YYYY hh:mm:ss a');
+        messages.push({user: data.user, message: escapeHtml(data.message), created_at: now});
+        clean_msg = escapeHtml(data.message);
+        io.emit('update_messages', {user: data.user, message: clean_msg, created_at: now});
     });
 
     // Show messages for all users
@@ -66,7 +67,7 @@ io.sockets.on('connection', function(socket) {
     // Login user
     socket.on('new_user', function (user) {
         socket.global_user = user.split(' ').join('_');
-        clients.push(socket.global_user);
+        clients[socket.id] = socket.global_user;
         socket.broadcast.emit('user_joined', socket.global_user);
     });
 
@@ -80,10 +81,7 @@ io.sockets.on('connection', function(socket) {
 
     // Logout user
     socket.on('disconnect', function () {
-        var i = clients.indexOf(socket.global_user);
-        if ( i != -1 ) {
-            clients.splice(i, 1);
-        }
+        delete clients[socket.id];
         io.emit('update_users', clients);
         io.emit('user_left', socket.global_user);
     });
