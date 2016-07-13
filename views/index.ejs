@@ -80,7 +80,7 @@
 
 
         function scrollMessages() {
-            $('.messages').animate({ scrollTop: $(document).height() }, "slow");
+            $('.messages').scrollTop($(document).height());
         }
 
         socket.emit('new_user', user);
