@@ -64,17 +64,17 @@ io.sockets.on('connection', function(socket) {
 
     // Login user
     socket.on('new_user', function (user) {
-        socket.global_user = user.split(' ').join('_');
+        socket.global_user = user.split(' ').join('_').split('.').join('');
         clients[socket.id] = socket.global_user;
         socket.broadcast.emit('user_joined', socket.global_user);
     });
 
     socket.on('user_typing', function(user) {
-        socket.broadcast.emit('user_typing_now', user.split(' ').join('_'));
+        socket.broadcast.emit('user_typing_now', user.split(' ').join('_').split('.').join(''));
     });
 
     socket.on('user_stopped_typing', function(user) {
-        socket.broadcast.emit('user_not_typing', user.split(' ').join('_'));
+        socket.broadcast.emit('user_not_typing', user.split(' ').join('_').split('.').join(''));
     });
 
     // Logout user
